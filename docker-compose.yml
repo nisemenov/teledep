@@ -4,5 +4,5 @@ services:
   telegram-bot:
     build: .
     volumes:
-      - .:/app
+      - /home/nisemenov/Dev/misc/teledep:/app/another_application
     restart: always
