@@ -27,11 +27,10 @@ async def pull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Pulling from remote origin...')
     
     result = subprocess.run("git pull", shell=True, capture_output=True, text=True)
-    await update.message.reply_text(result.stdout)
     if result.returncode == 0:
         await update.message.reply_text(result.stdout)
     else:
-        await update.message.reply_text(result.stderr)
+        await update.message.reply_text(f'{result.stdout}\n{result.stderr}')
 
 async def abort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run("git merge --abort", shell=True, capture_output=True, text=True)
