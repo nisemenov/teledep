@@ -1,14 +1,10 @@
 version: '3.9'
 
 services:
-  telegram-bot:
+  teledep:
     build: .
     volumes:
       - .:/app
+    env_file:
+      - .env
     restart: always
-    networks:
-      - main
-
-networks:
-  main:
-    driver: bridge

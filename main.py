@@ -1,5 +1,5 @@
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
