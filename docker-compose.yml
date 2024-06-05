@@ -4,5 +4,11 @@ services:
   telegram-bot:
     build: .
     volumes:
-      - /home/nisemenov/Dev/misc/teledep:/app/another_application
+      - .:/app
     restart: always
+    networks:
+      - main
+
+networks:
+  main:
+    driver: bridge
