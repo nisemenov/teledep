@@ -125,7 +125,7 @@ async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
-        './daemon.sh', 
+        'sudo systemctl stop teledep && sudo systemctl start teledep', 
         shell=True, 
         capture_output=True, 
         text=True
