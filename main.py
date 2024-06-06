@@ -27,8 +27,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /dbu - down + build + up;\n'
         '\n'
         'Команды для управления сервером:\n'
-        '- /daemonStop - остановка работы демона;\n'
-        '- /daemonRestart - рестарт демона;\n'
+        '- /daemonstop - остановка работы демона;\n'
+        '- /daemonrestart - рестарт демона;\n'
     )
 
 # for git
@@ -114,7 +114,7 @@ async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await up(update, context)
 
 # for server
-async def daemonStop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
         'sudo systemctl stop teledep', 
         shell=True, 
@@ -123,7 +123,7 @@ async def daemonStop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     )
     await update.message.reply_text('Daemon has just been stopped.')
 
-async def daemonRestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
         './daemon.sh', 
         shell=True, 
@@ -143,8 +143,8 @@ async def post_init(application: Application) -> None:
             ('down', 'docker compose down'),
             ('up', 'docker compose up -d'),
             ('dbu', 'down + build + up'),
-            ('daemonStop', 'Остановка работы демона'),
-            ('daemonRestart', 'Рестарт работы демона')
+            ('daemonstop', 'Остановка работы демона'),
+            ('daemonrestart', 'Рестарт работы демона')
         ]
     )
 
@@ -161,8 +161,8 @@ def main() -> None:
     application.add_handler(CommandHandler('ps', ps))
     application.add_handler(CommandHandler('dbu', dbu))
 
-    application.add_handler(CommandHandler('daemonStop', daemonStop))
-    application.add_handler(CommandHandler('daemonRestart', daemonRestart))
+    application.add_handler(CommandHandler('daemonstop', daemonstop))
+    application.add_handler(CommandHandler('daemonrestart', daemonrestart))
 
 
     application.run_polling()
