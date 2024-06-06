@@ -28,6 +28,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /dbu - down + build + up;\n'
         '\n'
         'Команды для управления демоном:\n'
+        '- /daemonpull - git pull;\n'
         '- /daemonstop - остановка работы демона;\n'
         '- /daemonrestart - рестарт демона;\n'
     )
@@ -142,6 +143,20 @@ async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     )
     await update.message.reply_text('Daemon has just been restarted.')
 
+async def daemonpull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Pulling from remote origin...')
+    
+    result = subprocess.run(
+        'git pull', 
+        shell=True, 
+        capture_output=True, 
+        text=True
+    )
+    if result.returncode == 0:
+        await update.message.reply_text(result.stdout)
+    else:
+        await update.message.reply_text(f'{result.stdout}\n{result.stderr}')
+
 async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(
         [
@@ -154,6 +169,7 @@ async def post_init(application: Application) -> None:
             ('down', 'docker compose down'),
             ('up', 'docker compose up -d'),
             ('dbu', 'down + build + up'),
+            ('daemonpull', 'Обновление проекта демона'),
             ('daemonstop', 'Остановка работы демона'),
             ('daemonrestart', 'Рестарт работы демона')
         ]
@@ -173,6 +189,7 @@ def main() -> None:
     application.add_handler(CommandHandler('ps', ps))
     application.add_handler(CommandHandler('dbu', dbu))
 
+    application.add_handler(CommandHandler('daemonpull', daemonpull))
     application.add_handler(CommandHandler('daemonstop', daemonstop))
     application.add_handler(CommandHandler('daemonrestart', daemonrestart))
 
