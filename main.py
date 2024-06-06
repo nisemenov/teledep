@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         'Команды для git:\n'
+        '- /fetch - git fetch и вывод последних 10 логов;\n'
         '- /log - просмотр 10 последних логов;\n'
         '- /pull - обновление проекта;\n'
         '- /abort - отмена merge в случае конфликта при pull;\n'
@@ -63,6 +64,15 @@ async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text=True
     )
     await update.message.reply_text('10 last logs:\n' + result.stdout)
+
+async def fetch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    result = subprocess.run(
+        f'cd {ROUTE} && git log --oneline --decorate --graph --all -n 10', 
+        shell=True, 
+        capture_output=True, 
+        text=True
+    )
+    await log(update, context)
 
 # for docker
 async def down(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -136,6 +146,7 @@ async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(
         [
             ('start', 'Показать все команды'),
+            ('fetch', 'git fetch и вывод последних 10 логов'),
             ('log', 'Просмотр 10 последних логов'),
             ('pull', 'Обновление проекта'),
             ('abort', 'Отмена merge в случае конфликта при pull'),
@@ -152,6 +163,7 @@ def main() -> None:
     application = Application.builder().token(TOKEN).post_init(post_init).build()
 
     application.add_handler(CommandHandler('start', start))
+    application.add_handler(CommandHandler('fetch', fetch))
     application.add_handler(CommandHandler('abort', abort))
     application.add_handler(CommandHandler('log', log))
     application.add_handler(CommandHandler('pull', pull))
