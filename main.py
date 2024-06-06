@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        'Команды для git:\n'
+        'Команды git для wisdom:\n'
         '- /fetch - git fetch и вывод последних 10 логов;\n'
         '- /log - просмотр 10 последних логов;\n'
         '- /pull - обновление проекта;\n'
         '- /abort - отмена merge в случае конфликта при pull;\n'
         '\n'
-        'Команды для docker:\n'
+        'Команды docker для wisdom:\n'
         '- /ps - вывод информации о контейнерах;\n'
         '- /down - docker compose down;\n'
         '- /up - docker compose up -d;\n'
@@ -126,7 +126,7 @@ async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # for daemon
 async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    result = subprocess.run(
+    subprocess.run(
         'sudo systemctl stop teledep', 
         shell=True, 
         capture_output=True, 
@@ -135,8 +135,8 @@ async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     await update.message.reply_text('Daemon has just been stopped.')
 
 async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    result = subprocess.run(
-        'sudo systemctl stop teledep && sudo systemctl start teledep', 
+    subprocess.run(
+        'sudo systemctl restart teledep', 
         shell=True, 
         capture_output=True, 
         text=True
