@@ -34,7 +34,7 @@ async def pull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Pulling from remote origin...')
     
     result = subprocess.run(
-        'git pull', 
+        f'cd {ROUTE} && git pull', 
         shell=True, 
         capture_output=True, 
         text=True
