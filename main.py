@@ -72,7 +72,7 @@ async def down(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text=True
     )
     await update.message.reply_text(
-        f'The containers from {ROUTE}/docker-compose.yml were downed.'
+        f'The containers from {ROUTE}docker-compose.yml were downed.'
     )
 
 async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -84,7 +84,7 @@ async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text=True
     )
     await update.message.reply_text(
-        f'Containers from {ROUTE}/docker-compose.yml were built.'
+        f'Containers from {ROUTE}docker-compose.yml were built.'
     )
     await update.message.reply_text('Starting up...')
     result = subprocess.run(
@@ -94,8 +94,9 @@ async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text=True
     )
     await update.message.reply_text(
-        f'Containers from {ROUTE}/docker-compose.yml were upped.'
+        f'Containers from {ROUTE}docker-compose.yml were upped.'
     )
+    await ps(update, context)
 
 async def ps(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # await update.message.reply_text('Starting building...')
@@ -110,6 +111,7 @@ async def ps(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await down(update, context)
     await up(update, context)
+    await ps(update, context)
 
 async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(
