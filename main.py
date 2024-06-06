@@ -21,12 +21,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /abort - отмена merge в случае конфликта при pull;\n'
         '\n'
         'Команды для docker:\n'
-        '- /ps - вывод информации о контейнерах\n'
-        '- /down - docker compose down\n'
-        '- /up - docker compose up -d\n'
-        '- /dbu - down + build + up'
+        '- /ps - вывод информации о контейнерах;\n'
+        '- /down - docker compose down;\n'
+        '- /up - docker compose up -d;\n'
+        '- /dbu - down + build + up;\n'
         '\n'
         'Команды для управления сервером:\n'
+        '- /daemonStop - остановка работы демона;\n'
+        '- /daemonRestart - рестарт демона;\n'
     )
 
 # for git
@@ -99,7 +101,6 @@ async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await ps(update, context)
 
 async def ps(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # await update.message.reply_text('Starting building...')
     result = subprocess.run(
         f'cd {ROUTE} && docker ps --format "table {{"{{.ID}}"}}\t{{"{{.Status}}"}}\t{{"{{.Names}}"}}"', 
         shell=True, 
@@ -111,7 +112,25 @@ async def ps(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await down(update, context)
     await up(update, context)
-    await ps(update, context)
+
+# for server
+async def daemonStop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    result = subprocess.run(
+        'sudo systemctl stop teledep', 
+        shell=True, 
+        capture_output=True, 
+        text=True
+    )
+    await update.message.reply_text('Daemon has just been stopped.')
+
+async def daemonRestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    result = subprocess.run(
+        './daemon.sh', 
+        shell=True, 
+        capture_output=True, 
+        text=True
+    )
+    await update.message.reply_text('Daemon has just been restarted.')
 
 async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(
@@ -124,6 +143,8 @@ async def post_init(application: Application) -> None:
             ('down', 'docker compose down'),
             ('up', 'docker compose up -d'),
             ('dbu', 'down + build + up'),
+            ('daemonStop', 'Остановка работы демона'),
+            ('daemonRestart', 'Рестарт работы демона')
         ]
     )
 
@@ -139,6 +160,9 @@ def main() -> None:
     application.add_handler(CommandHandler('up', up))
     application.add_handler(CommandHandler('ps', ps))
     application.add_handler(CommandHandler('dbu', dbu))
+
+    application.add_handler(CommandHandler('daemonStop', daemonStop))
+    application.add_handler(CommandHandler('daemonRestart', daemonRestart))
 
 
     application.run_polling()
