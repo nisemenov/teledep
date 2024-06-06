@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /up - docker compose up -d;\n'
         '- /dbu - down + build + up;\n'
         '\n'
-        'Команды для управления сервером:\n'
+        'Команды для управления демоном:\n'
         '- /daemonstop - остановка работы демона;\n'
         '- /daemonrestart - рестарт демона;\n'
     )
@@ -113,7 +113,7 @@ async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await down(update, context)
     await up(update, context)
 
-# for server
+# for daemon
 async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
         'sudo systemctl stop teledep', 
