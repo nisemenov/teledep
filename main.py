@@ -24,11 +24,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         'Команды docker для wisdom:\n'
         '- /ps - вывод информации о контейнерах;\n'
         '- /down - docker compose down;\n'
-        '- /up - docker compose up -d;\n'
+        '- /up - docker compose build && up -d;\n'
         '- /dbu - down + build + up;\n'
         '\n'
         'Команды для управления демоном:\n'
-        '- /daemonpull - git pull;\n'
+        '- /daemonpull - обновление проекта демона;\n'
         '- /daemonstop - остановка работы демона;\n'
         '- /daemonrestart - рестарт демона;\n'
     )
@@ -167,7 +167,7 @@ async def post_init(application: Application) -> None:
             ('abort', 'Отмена merge в случае конфликта при pull'),
             ('ps', 'Вывод информации о контейнерах'),
             ('down', 'docker compose down'),
-            ('up', 'docker compose up -d'),
+            ('up', 'docker compose build && up -d'),
             ('dbu', 'down + build + up'),
             ('daemonpull', 'Обновление проекта демона'),
             ('daemonstop', 'Остановка работы демона'),
