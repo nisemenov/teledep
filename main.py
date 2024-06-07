@@ -29,7 +29,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '\n'
         'Команды для управления демоном:\n'
         '- /daemonpull - обновление проекта демона;\n'
-        '- /daemonstop - остановка работы демона;\n'
         '- /daemonrestart - рестарт демона;\n'
     )
 
@@ -170,7 +169,6 @@ async def post_init(application: Application) -> None:
             ('up', 'docker compose build && up -d'),
             ('dbu', 'down + build + up'),
             ('daemonpull', 'Обновление проекта демона'),
-            ('daemonstop', 'Остановка работы демона'),
             ('daemonrestart', 'Рестарт работы демона')
         ]
     )
