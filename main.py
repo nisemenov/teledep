@@ -19,13 +19,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /fetch - git fetch и вывод последних 10 логов;\n'
         '- /log - просмотр 10 последних логов;\n'
         '- /pull - обновление проекта;\n'
-        '- /abort - отмена merge в случае конфликта при pull;\n'
+        '- /abort - отмена merge в случае конфликта при pull.\n'
         '\n'
         'Команды docker для wisdom:\n'
         '- /ps - вывод информации о контейнерах;\n'
         '- /down - docker compose down;\n'
         '- /up - docker compose build && up -d;\n'
         '- /dbu - down + build + up;\n'
+        '- /migrate - миграции для wisdom-backend-dev.\n'
+        '\n'
+        'Общее:\n'
+        '- /pull_dbu_migrate - pull + down/build/up + migrate.\n'
         '\n'
         'Команды для управления демоном:\n'
         '- /daemonpull - обновление проекта демона;\n'
@@ -123,6 +127,22 @@ async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await down(update, context)
     await up(update, context)
 
+async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Starting migrate...')
+    result = subprocess.run(
+        f'cd {ROUTE} && docker exec -it wisdom-backend-dev python3 manage.py migrate', 
+        shell=True, 
+        capture_output=True, 
+        text=True
+    )
+    await update.message.reply_text(result.stdout)
+
+# common
+async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await pull(update, context)
+    await dbu(update, context)
+    await migrate(update, context)
+
 # for daemon
 async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     subprocess.run(
@@ -168,6 +188,8 @@ async def post_init(application: Application) -> None:
             ('down', 'docker compose down'),
             ('up', 'docker compose build && up -d'),
             ('dbu', 'down + build + up'),
+            ('migrate', 'Миграции для wisdom-backend-dev'),
+            ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
             ('daemonrestart', 'Рестарт работы демона')
         ]
@@ -186,6 +208,9 @@ def main() -> None:
     application.add_handler(CommandHandler('up', up))
     application.add_handler(CommandHandler('ps', ps))
     application.add_handler(CommandHandler('dbu', dbu))
+    application.add_handler(CommandHandler('migrate', migrate))
+
+    application.add_handler(CommandHandler('pull_dbu_migrate', pull_dbu_migrate))
 
     application.add_handler(CommandHandler('daemonpull', daemonpull))
     application.add_handler(CommandHandler('daemonstop', daemonstop))
