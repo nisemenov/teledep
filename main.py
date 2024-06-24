@@ -135,7 +135,10 @@ async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text(result.stdout)
+    if result.stdout:
+        await update.message.reply_text(result.stdout)
+    else:
+        await update.message.reply_text('No migrations to apply.')
 
 # common
 async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
