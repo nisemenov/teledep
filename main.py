@@ -1,3 +1,4 @@
+import time
 from dotenv import load_dotenv
 import os
 import logging
@@ -36,7 +37,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /daemonrestart - рестарт демона;\n'
     )
 
-# for git
+# GIT
 async def pull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Pulling from remote origin...')
     
@@ -71,14 +72,14 @@ async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def fetch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
-        f'cd {ROUTE} && git log --oneline --decorate --graph --all -n 10', 
+        f'cd {ROUTE} && git fetch', 
         shell=True, 
         capture_output=True, 
         text=True
     )
     await log(update, context)
 
-# for docker
+# DOCKER
 async def down(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Starting down...')
     result = subprocess.run(
@@ -135,18 +136,20 @@ async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         capture_output=True, 
         text=True
     )
+    print(result)
+    print(result.stdout)
     if result.stdout:
         await update.message.reply_text(result.stdout)
     else:
         await update.message.reply_text('No migrations to apply.')
 
-# common
+# COMMON
 async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await pull(update, context)
     await dbu(update, context)
     await migrate(update, context)
 
-# for daemon
+# DAEMON
 async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     subprocess.run(
         'sudo systemctl stop teledep', 
@@ -157,17 +160,18 @@ async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     await update.message.reply_text('Daemon has just been stopped.')
 
 async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Daemon is restarting...')
     subprocess.run(
         'sudo systemctl restart teledep', 
         shell=True, 
         capture_output=True, 
         text=True
     )
+    time.sleep(5)
     await update.message.reply_text('Daemon has just been restarted.')
 
 async def daemonpull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Pulling from remote origin...')
-    
     result = subprocess.run(
         'git pull', 
         shell=True, 
