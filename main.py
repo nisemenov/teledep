@@ -8,14 +8,15 @@ import subprocess
 
 load_dotenv()
 
-TOKEN: str | None = os.getenv('TOKEN')
-ROUTE: str | None = os.getenv('ROUTE')
+TOKEN: str = os.getenv('TOKEN') # type: ignore
+PROJECT_PATH: str | None = os.getenv('PROJECT_PATH')
+DOCKER_PATH: str | None = os.getenv('DOCKER_PATH')
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(
+    await update.message.reply_text( # type: ignore
         'Команды git для wisdom:\n'
         '- /fetch - git fetch и вывод последних 10 логов;\n'
         '- /log - просмотр 10 последних логов;\n'
@@ -27,6 +28,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /down - docker compose down;\n'
         '- /up - docker compose build && up -d;\n'
         '- /dbu - down + build + up;\n'
+        '- /makemigrations - создание миграций в контейнере;\n'
         '- /migrate - миграции для wisdom-backend-dev.\n'
         '\n'
         'Общее:\n'
@@ -39,40 +41,40 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # GIT
 async def pull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Pulling from remote origin...')
+    await update.message.reply_text('Pulling from remote origin...') # type: ignore
     
     result = subprocess.run(
-        f'cd {ROUTE} && git pull', 
+        f'cd {PROJECT_PATH} && git pull', 
         shell=True, 
         capture_output=True, 
         text=True
     )
     if result.returncode == 0:
-        await update.message.reply_text(result.stdout)
+        await update.message.reply_text(result.stdout) # type: ignore
     else:
-        await update.message.reply_text(f'{result.stdout}\n{result.stderr}')
+        await update.message.reply_text(f'{result.stdout}\n{result.stderr}') # type: ignore
 
 async def abort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
-        f'cd {ROUTE} && git merge --abort', 
+        f'cd {PROJECT_PATH} && git merge --abort', 
         shell=True, 
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text('Merge was aborted.')
+    await update.message.reply_text('Merge was aborted.') # type: ignore
 
 async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
-        f'cd {ROUTE} && git log --oneline --decorate --graph --all -n 10', 
+        f'cd {PROJECT_PATH} && git log --oneline --decorate --graph --all -n 10', 
         shell=True, 
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text('10 last logs:\n' + result.stdout)
+    await update.message.reply_text('10 last logs:\n' + result.stdout) # type: ignore
 
 async def fetch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
-        f'cd {ROUTE} && git fetch', 
+        f'cd {PROJECT_PATH} && git fetch', 
         shell=True, 
         capture_output=True, 
         text=True
@@ -81,67 +83,74 @@ async def fetch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # DOCKER
 async def down(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Starting down...')
+    await update.message.reply_text('Starting down...') # type: ignore
     result = subprocess.run(
-        f'cd {ROUTE} && docker compose -f {ROUTE}/docker-compose.yml down', 
+        f'docker compose -f {DOCKER_PATH}/docker-compose.yml down', 
         shell=True, 
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text(
-        f'The containers from {ROUTE}docker-compose.yml were downed.'
+    await update.message.reply_text( # type: ignore
+        f'The containers from {DOCKER_PATH}/docker-compose.yml were downed.'
     )
 
 async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Starting build...')
+    await update.message.reply_text('Starting build...') # type: ignore
     result = subprocess.run(
-        f'cd {ROUTE} && docker compose -f {ROUTE}/docker-compose.yml build', 
+        f'docker compose -f {DOCKER_PATH}/docker-compose.yml build', 
         shell=True, 
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text(
-        f'Containers from {ROUTE}docker-compose.yml were built.'
+    await update.message.reply_text( # type: ignore
+        f'Containers from {DOCKER_PATH}/docker-compose.yml were built.'
     )
-    await update.message.reply_text('Starting up...')
+    await update.message.reply_text('Starting up...') # type: ignore
     result = subprocess.run(
-        f'cd {ROUTE} && docker compose -f {ROUTE}/docker-compose.yml up -d', 
+        f'docker compose -f {DOCKER_PATH}/docker-compose.yml up -d', 
         shell=True, 
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text(
-        f'Containers from {ROUTE}docker-compose.yml were upped.'
+    await update.message.reply_text( # type: ignore
+        f'Containers from {DOCKER_PATH}/docker-compose.yml were upped.'
     )
     await ps(update, context)
 
 async def ps(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     result = subprocess.run(
-        f'cd {ROUTE} && docker ps --format "table {{"{{.ID}}"}}\t{{"{{.Status}}"}}\t{{"{{.Names}}"}}"', 
+        f'docker ps --format "table {{"{{.ID}}"}}\t{{"{{.Status}}"}}\t{{"{{.Names}}"}}"', 
         shell=True, 
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text(result.stdout)
+    await update.message.reply_text(result.stdout) # type: ignore
 
 async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await down(update, context)
     await up(update, context)
 
-async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Starting migrate...')
+async def makemigrations(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Starting makemigrations...') # type: ignore
     result = subprocess.run(
-        f'cd {ROUTE} && docker exec -it wisdom-backend-dev python3 manage.py migrate', 
+        f'docker exec -it wisdom-backend-dev python3 manage.py makemigrations', 
         shell=True, 
         capture_output=True, 
         text=True
     )
-    print(result)
-    print(result.stdout)
-    if result.stdout:
-        await update.message.reply_text(result.stdout)
-    else:
-        await update.message.reply_text('No migrations to apply.')
+    await update.message.reply_text(result.stdout) # type: ignore
+
+async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Starting migrate...') # type: ignore
+    result = subprocess.run(
+        f'docker exec -it wisdom-backend-dev python3 manage.py migrate', 
+        shell=True, 
+        capture_output=True, 
+        text=True
+    )
+    ind = result.stdout.index('Running migrations')
+    await update.message.reply_text(result.stdout[ind:]) # type: ignore
+
 
 # COMMON
 async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -157,10 +166,10 @@ async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         capture_output=True, 
         text=True
     )
-    await update.message.reply_text('Daemon has just been stopped.')
+    await update.message.reply_text('Daemon has just been stopped.') # type: ignore
 
 async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Daemon is restarting...')
+    await update.message.reply_text('Daemon is restarting...') # type: ignore
     subprocess.run(
         'sudo systemctl restart teledep', 
         shell=True, 
@@ -168,10 +177,10 @@ async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         text=True
     )
     time.sleep(5)
-    await update.message.reply_text('Daemon has just been restarted.')
+    await update.message.reply_text('Daemon has just been restarted.') # type: ignore
 
 async def daemonpull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Pulling from remote origin...')
+    await update.message.reply_text('Pulling from remote origin...') # type: ignore
     result = subprocess.run(
         'git pull', 
         shell=True, 
@@ -179,9 +188,9 @@ async def daemonpull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         text=True
     )
     if result.returncode == 0:
-        await update.message.reply_text(result.stdout)
+        await update.message.reply_text(result.stdout) # type: ignore
     else:
-        await update.message.reply_text(f'{result.stdout}\n{result.stderr}')
+        await update.message.reply_text(f'{result.stdout}\n{result.stderr}') # type: ignore
 
 async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(
@@ -195,6 +204,7 @@ async def post_init(application: Application) -> None:
             ('down', 'docker compose down'),
             ('up', 'docker compose build && up -d'),
             ('dbu', 'down + build + up'),
+            ('makemigrations', 'Создание миграций для wisdom-backend-dev'),
             ('migrate', 'Миграции для wisdom-backend-dev'),
             ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
@@ -215,6 +225,7 @@ def main() -> None:
     application.add_handler(CommandHandler('up', up))
     application.add_handler(CommandHandler('ps', ps))
     application.add_handler(CommandHandler('dbu', dbu))
+    application.add_handler(CommandHandler('makemigrations', makemigrations))
     application.add_handler(CommandHandler('migrate', migrate))
 
     application.add_handler(CommandHandler('pull_dbu_migrate', pull_dbu_migrate))
