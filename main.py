@@ -1,4 +1,5 @@
 import time
+import docker
 from dotenv import load_dotenv
 import os
 import logging
@@ -7,6 +8,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 import subprocess
 
 load_dotenv()
+client = docker.from_env()
 
 TOKEN: str = os.getenv('TOKEN') # type: ignore
 PROJECT_PATH: str | None = os.getenv('PROJECT_PATH')
@@ -132,24 +134,22 @@ async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def makemigrations(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Starting makemigrations...') # type: ignore
-    result = subprocess.run(
-        f'docker exec -it wisdom-backend-dev python3 manage.py makemigrations', 
-        shell=True, 
-        capture_output=True, 
-        text=True
-    )
-    await update.message.reply_text(result.stdout) # type: ignore
+
+    container = client.containers.get('wisdom-backend-dev')
+    result = container.exec_run('python3 manage.py makemigrations')
+    stdout = result.output.decode('utf-8')
+
+    await update.message.reply_text(stdout) # type: ignore
 
 async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Starting migrate...') # type: ignore
-    result = subprocess.run(
-        f'docker exec -it wisdom-backend-dev python3 manage.py migrate', 
-        shell=True, 
-        capture_output=True, 
-        text=True
-    )
-    ind = result.stdout.index('Running migrations')
-    await update.message.reply_text(result.stdout[ind:]) # type: ignore
+    
+    container = client.containers.get('wisdom-backend-dev')
+    result = container.exec_run('python3 manage.py migrate')
+    stdout = result.output.decode('utf-8')
+    ind = stdout.index('Running migrations')
+
+    await update.message.reply_text(stdout[ind:]) # type: ignore
 
 
 # COMMON
