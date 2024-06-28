@@ -33,7 +33,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /up - docker compose build && up -d;\n'
         '- /dbu - down + build + up;\n'
         # '- /makemigrations - создание миграций в контейнере;\n'
-        '- /migrate - миграции для wisdom-backend-dev;\n'
+        '- /migrate - применение миграций для wisdom-backend-dev;\n'
         '- /reset_db - drop и create postgres db.\n'
         '\n'
         'Общее:\n'
@@ -239,7 +239,7 @@ async def post_init(application: Application) -> None:
             ('up', 'docker compose build && up -d'),
             ('dbu', 'down + build + up'),
             # ('makemigrations', 'Создание миграций для wisdom-backend-dev'),
-            ('migrate', 'Миграции для wisdom-backend-dev'),
+            ('migrate', 'Применение миграций для wisdom-backend-dev'),
             ('reset_db', 'drop и create postgres db'),
             ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
