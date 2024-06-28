@@ -13,6 +13,8 @@ client = docker.from_env()
 TOKEN: str = os.getenv('TOKEN') # type: ignore
 PROJECT_PATH: str | None = os.getenv('PROJECT_PATH')
 DOCKER_PATH: str | None = os.getenv('DOCKER_PATH')
+DJANGO_SUPERUSER_USERNAME: str | None = os.getenv('DJANGO_SUPERUSER_USERNAME')
+DJANGO_SUPERUSER_PASSWORD: str | None = os.getenv('DJANGO_SUPERUSER_PASSWORD')
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,7 +33,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /up - docker compose build && up -d;\n'
         '- /dbu - down + build + up;\n'
         '- /makemigrations - создание миграций в контейнере;\n'
-        '- /migrate - миграции для wisdom-backend-dev.\n'
+        '- /migrate - миграции для wisdom-backend-dev;\n'
+        '- /reset_db - drop и create postgres db.\n'
         '\n'
         'Общее:\n'
         '- /pull_dbu_migrate - pull + down/build/up + migrate.\n'
@@ -151,6 +154,37 @@ async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await update.message.reply_text(stdout[ind:]) # type: ignore
 
+async def reset_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Starting reset DB...') # type: ignore
+    result = subprocess.run(
+        ['./reset_db.sh'],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode == 0:
+        await update.message.reply_text('DB has just been reset.') # type: ignore
+    else:
+        await update.message.reply_text( # type: ignore
+            f'Something went wrong with {result.stderr}'
+        )
+
+    await update.message.reply_text('Starting create superuser...') # type: ignore
+    result = subprocess.run(
+        ['./create_superuser.sh'],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode == 0:
+        await update.message.reply_text( # type: ignore
+            f"Superuser has just been created:\n"
+            f"username = {DJANGO_SUPERUSER_USERNAME}\n"
+            f"password = {DJANGO_SUPERUSER_PASSWORD}"
+        )
+    else:
+        await update.message.reply_text( # type: ignore
+            f'Something went wrong with {result.stderr}'
+        )
+
 
 # COMMON
 async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -206,6 +240,7 @@ async def post_init(application: Application) -> None:
             ('dbu', 'down + build + up'),
             ('makemigrations', 'Создание миграций для wisdom-backend-dev'),
             ('migrate', 'Миграции для wisdom-backend-dev'),
+            ('reset_db', 'drop и create postgres db'),
             ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
             ('daemonrestart', 'Рестарт работы демона')
@@ -227,6 +262,7 @@ def main() -> None:
     application.add_handler(CommandHandler('dbu', dbu))
     application.add_handler(CommandHandler('makemigrations', makemigrations))
     application.add_handler(CommandHandler('migrate', migrate))
+    application.add_handler(CommandHandler('reset_db', reset_db))
 
     application.add_handler(CommandHandler('pull_dbu_migrate', pull_dbu_migrate))
 
