@@ -90,35 +90,35 @@ async def fetch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def down(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Starting down...') # type: ignore
     result = subprocess.run(
-        f'docker compose -f {DOCKER_PATH}/docker-compose.yml down', 
+        f'docker compose -f {DOCKER_PATH}/docker-compose.dev.yml down', 
         shell=True, 
         capture_output=True, 
         text=True
     )
     await update.message.reply_text( # type: ignore
-        f'The containers from {DOCKER_PATH}/docker-compose.yml were downed.'
+        f'The containers from {DOCKER_PATH}/docker-compose.dev.yml were downed.'
     )
 
 async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Starting build...') # type: ignore
     result = subprocess.run(
-        f'docker compose -f {DOCKER_PATH}/docker-compose.yml build', 
+        f'docker compose -f {DOCKER_PATH}/docker-compose.dev.yml build', 
         shell=True, 
         capture_output=True, 
         text=True
     )
     await update.message.reply_text( # type: ignore
-        f'Containers from {DOCKER_PATH}/docker-compose.yml were built.'
+        f'Containers from {DOCKER_PATH}/docker-compose.dev.yml were built.'
     )
     await update.message.reply_text('Starting up...') # type: ignore
     result = subprocess.run(
-        f'docker compose -f {DOCKER_PATH}/docker-compose.yml up -d', 
+        f'docker compose -f {DOCKER_PATH}/docker-compose.dev.yml up -d', 
         shell=True, 
         capture_output=True, 
         text=True
     )
     await update.message.reply_text( # type: ignore
-        f'Containers from {DOCKER_PATH}/docker-compose.yml were upped.'
+        f'Containers from {DOCKER_PATH}/docker-compose.dev.yml were upped.'
     )
     await ps(update, context)
 
