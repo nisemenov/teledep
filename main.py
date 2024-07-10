@@ -37,7 +37,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /reset_db - drop и create postgres db.\n'
         '\n'
         'Общее:\n'
-        '- /pull_dbu_migrate - pull + down/build/up + migrate.\n'
+        '- /pull_dbu_migrate - pull + down/build/up + migrate;\n',
+        '- /create_fake_profiles - создание 100 фейковых профилей.\n'
         '\n'
         'Команды для управления демоном:\n'
         '- /daemonpull - обновление проекта демона;\n'
@@ -192,6 +193,22 @@ async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await dbu(update, context)
     await migrate(update, context)
 
+async def create_fake_profiles(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    await update.message.reply_text('Starting creating fake profiles...') # type: ignore
+    result = subprocess.run(
+        ['./create_fake_profiles.sh'],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode == 0:
+        await update.message.reply_text(result.stdout) # type: ignore
+    else:
+        await update.message.reply_text( # type: ignore
+            f'Something went wrong with {result.stderr}'
+        )
+
 # DAEMON
 async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     subprocess.run(
@@ -241,6 +258,7 @@ async def post_init(application: Application) -> None:
             # ('makemigrations', 'Создание миграций для wisdom-backend-dev'),
             ('migrate', 'Применение миграций для wisdom-backend-dev'),
             ('reset_db', 'drop и create postgres db'),
+            ('create_fake_profiles', 'Создание 100 фейковых профилей'),
             ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
             ('daemonrestart', 'Рестарт работы демона')
@@ -265,6 +283,7 @@ def main() -> None:
     application.add_handler(CommandHandler('reset_db', reset_db))
 
     application.add_handler(CommandHandler('pull_dbu_migrate', pull_dbu_migrate))
+    application.add_handler(CommandHandler('create_fake_profiles', create_fake_profiles))
 
     application.add_handler(CommandHandler('daemonpull', daemonpull))
     application.add_handler(CommandHandler('daemonstop', daemonstop))
