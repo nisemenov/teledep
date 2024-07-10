@@ -2,4 +2,4 @@
 
 source .env
 
-docker exec -it $APP_CONTAINER python3 manage.py profilefactory
+docker exec $APP_CONTAINER python3 manage.py profilefactory
