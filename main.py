@@ -186,7 +186,6 @@ async def reset_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             f'Something went wrong with {result.stderr}'
         )
 
-
 # COMMON
 async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await pull(update, context)
@@ -203,7 +202,7 @@ async def create_fake_profiles(
         text=True
     )
     if result.returncode == 0:
-        await update.message.reply_text(result.stdout) # type: ignore
+        await update.message.reply_text('Successfully created 100 fake Profile instances.') # type: ignore
     else:
         await update.message.reply_text( # type: ignore
             f'Something went wrong with {result.stderr}'
