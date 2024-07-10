@@ -37,7 +37,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /reset_db - drop и create postgres db.\n'
         '\n'
         'Общее:\n'
-        '- /pull_dbu_migrate - pull + down/build/up + migrate;\n',
+        '- /pull_dbu_migrate - pull + down/build/up + migrate;\n'
         '- /create_fake_profiles - создание 100 фейковых профилей.\n'
         '\n'
         'Команды для управления демоном:\n'
