@@ -18,8 +18,6 @@ DOCKER_PATH: str | None = os.getenv('DOCKER_PATH')
 DJANGO_SUPERUSER_USERNAME: str | None = os.getenv('DJANGO_SUPERUSER_USERNAME')
 DJANGO_SUPERUSER_PASSWORD: str | None = os.getenv('DJANGO_SUPERUSER_PASSWORD')
 
-logging.basicConfig(level=logging.WARNING)
-
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     function_name: str = inspect.currentframe().f_code.co_name
