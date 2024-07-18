@@ -1,8 +1,10 @@
+import inspect
+import logging
 import time
 import docker
 from dotenv import load_dotenv
 import os
-import logging
+from logger_config import custom_log, get_logger
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import subprocess
@@ -16,10 +18,13 @@ DOCKER_PATH: str | None = os.getenv('DOCKER_PATH')
 DJANGO_SUPERUSER_USERNAME: str | None = os.getenv('DJANGO_SUPERUSER_USERNAME')
 DJANGO_SUPERUSER_PASSWORD: str | None = os.getenv('DJANGO_SUPERUSER_PASSWORD')
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.WARNING)
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text( # type: ignore
         'Команды git для wisdom:\n'
         '- /fetch - git fetch и вывод последних 10 логов;\n'
@@ -38,15 +43,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '\n'
         'Общее:\n'
         '- /pull_dbu_migrate - pull + down/build/up + migrate;\n'
-        '- /create_fake_profiles - создание 100 фейковых профилей.\n'
+        '- /create_fake_profiles - создание фейковых профилей.\n'
         '\n'
         'Команды для управления демоном:\n'
         '- /daemonpull - обновление проекта демона;\n'
+        # '- /daemonstop - остановка работы демона;\n'
         '- /daemonrestart - рестарт демона;\n'
     )
 
 # GIT
 async def pull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Pulling from remote origin...') # type: ignore
     
     result = subprocess.run(
@@ -61,6 +70,9 @@ async def pull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f'{result.stdout}\n{result.stderr}') # type: ignore
 
 async def abort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     result = subprocess.run(
         f'cd {PROJECT_PATH} && git merge --abort', 
         shell=True, 
@@ -70,6 +82,9 @@ async def abort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Merge was aborted.') # type: ignore
 
 async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     result = subprocess.run(
         f'cd {PROJECT_PATH} && git log --oneline --decorate --graph --all -n 10', 
         shell=True, 
@@ -79,6 +94,9 @@ async def log(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('10 last logs:\n' + result.stdout) # type: ignore
 
 async def fetch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     result = subprocess.run(
         f'cd {PROJECT_PATH} && git fetch', 
         shell=True, 
@@ -89,6 +107,9 @@ async def fetch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # DOCKER
 async def down(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Starting down...') # type: ignore
     result = subprocess.run(
         f'docker compose -f {DOCKER_PATH}/docker-compose.dev.yml down', 
@@ -101,6 +122,9 @@ async def down(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Starting build...') # type: ignore
     result = subprocess.run(
         f'docker compose -f {DOCKER_PATH}/docker-compose.dev.yml build', 
@@ -124,6 +148,9 @@ async def up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await ps(update, context)
 
 async def ps(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     result = subprocess.run(
         f'docker ps --format "table {{"{{.ID}}"}}\t{{"{{.Status}}"}}\t{{"{{.Names}}"}}"', 
         shell=True, 
@@ -133,10 +160,16 @@ async def ps(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(result.stdout) # type: ignore
 
 async def dbu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await down(update, context)
     await up(update, context)
 
 async def makemigrations(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Starting makemigrations...') # type: ignore
 
     container = client.containers.get('wisdom-backend-dev')
@@ -146,6 +179,9 @@ async def makemigrations(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.message.reply_text(stdout) # type: ignore
 
 async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Starting migrate...') # type: ignore
     
     container = client.containers.get('wisdom-backend-dev')
@@ -156,6 +192,9 @@ async def migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(stdout[ind:]) # type: ignore
 
 async def reset_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Starting reset DB...') # type: ignore
     result = subprocess.run(
         ['./reset_db.sh'],
@@ -188,6 +227,9 @@ async def reset_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # COMMON
 async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await pull(update, context)
     await dbu(update, context)
     await migrate(update, context)
@@ -195,6 +237,9 @@ async def pull_dbu_migrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def create_fake_profiles(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Starting creating fake profiles...') # type: ignore
     result = subprocess.run(
         ['./create_fake_profiles.sh'],
@@ -202,7 +247,7 @@ async def create_fake_profiles(
         text=True
     )
     if result.returncode == 0:
-        await update.message.reply_text('Successfully created 100 fake Profile instances.') # type: ignore
+        await update.message.reply_text('Successfully created fake Profile instances.') # type: ignore
     else:
         await update.message.reply_text( # type: ignore
             f'Something went wrong with {result.stderr}'
@@ -210,6 +255,9 @@ async def create_fake_profiles(
 
 # DAEMON
 async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     subprocess.run(
         'sudo systemctl stop teledep', 
         shell=True, 
@@ -219,6 +267,9 @@ async def daemonstop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     await update.message.reply_text('Daemon has just been stopped.') # type: ignore
 
 async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Daemon is restarting...') # type: ignore
     subprocess.run(
         'sudo systemctl restart teledep', 
@@ -230,6 +281,9 @@ async def daemonrestart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await update.message.reply_text('Daemon has just been restarted.') # type: ignore
 
 async def daemonpull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('Pulling from remote origin...') # type: ignore
     result = subprocess.run(
         'git pull', 
@@ -265,6 +319,9 @@ async def post_init(application: Application) -> None:
     )
 
 def main() -> None:
+    logger = get_logger(__name__)
+    logger.info('test')
+
     application = Application.builder().token(TOKEN).post_init(post_init).build()
 
     application.add_handler(CommandHandler('start', start))
