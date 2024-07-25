@@ -302,7 +302,7 @@ async def poetryinstall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await update.message.reply_text('poetry install...') # type: ignore
     result = subprocess.run(
-        f'cd {DAEMON_PATH} && {POETRY_PATH} install --no-root', 
+        f'cd {DAEMON_PATH} && rm poetry.lock && {POETRY_PATH} install --no-root', 
         shell=True, 
         capture_output=True, 
         text=True
