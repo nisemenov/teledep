@@ -1,5 +1,4 @@
 import inspect
-import logging
 import time
 import docker
 from dotenv import load_dotenv
@@ -17,6 +16,9 @@ PROJECT_PATH: str | None = os.getenv('PROJECT_PATH')
 DOCKER_PATH: str | None = os.getenv('DOCKER_PATH')
 DJANGO_SUPERUSER_USERNAME: str | None = os.getenv('DJANGO_SUPERUSER_USERNAME')
 DJANGO_SUPERUSER_PASSWORD: str | None = os.getenv('DJANGO_SUPERUSER_PASSWORD')
+
+DAEMON_PATH: str | None = os.getenv('DAEMON_PATH')
+POETRY_PATH: str | None = os.getenv('POETRY_PATH')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -294,6 +296,23 @@ async def daemonpull(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     else:
         await update.message.reply_text(f'{result.stdout}\n{result.stderr}') # type: ignore
 
+async def poetryinstall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
+    await update.message.reply_text('poetry install...') # type: ignore
+    result = subprocess.run(
+        f'cd {DAEMON_PATH} && {POETRY_PATH} install --no-root', 
+        shell=True, 
+        capture_output=True, 
+        text=True
+    )
+
+    if result.returncode == 0:
+        await update.message.reply_text(result.stdout) # type: ignore
+    else:
+        await update.message.reply_text(f'{result.stdout}\n{result.stderr}') # type: ignore
+
 async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(
         [
@@ -312,7 +331,8 @@ async def post_init(application: Application) -> None:
             ('create_fake_profiles', 'Создание 100 фейковых профилей'),
             ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
-            ('daemonrestart', 'Рестарт работы демона')
+            ('daemonrestart', 'Рестарт работы демона'),
+            # ('poetryinstall', 'poetry install')
         ]
     )
 
@@ -342,6 +362,7 @@ def main() -> None:
     application.add_handler(CommandHandler('daemonpull', daemonpull))
     application.add_handler(CommandHandler('daemonstop', daemonstop))
     application.add_handler(CommandHandler('daemonrestart', daemonrestart))
+    application.add_handler(CommandHandler('poetryinstall', poetryinstall))
 
 
     application.run_polling()

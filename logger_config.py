@@ -1,3 +1,5 @@
+from datetime import datetime
+from pytz import timezone
 import logging
 import inspect
 
@@ -9,6 +11,7 @@ class CustomFormatter(logging.Formatter):
         return super(CustomFormatter, self).format(record)
 
 formatter = CustomFormatter('%(asctime)s - %(function_name)s - %(levelname)s - %(message)s')
+formatter.converter = lambda *args: datetime.now(tz=timezone('Europe/Moscow')).timetuple()
 
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
