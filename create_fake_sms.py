@@ -1,15 +1,24 @@
+import inspect
 import subprocess
 from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, filters, ConversationHandler, ContextTypes
+
+from logger_config import custom_log
 
 # Определение этапов разговора
 ASKING_FOR_COURSES = 0
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     await update.message.reply_text('How many sm sets do you need? Default is 100.')
     return ASKING_FOR_COURSES
 
 async def receive_sms_count(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+
     # Получение количества sms из сообщения пользователя
     sms_count = update.message.text
     if not sms_count.isdigit():
@@ -31,6 +40,9 @@ async def receive_sms_count(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    function_name: str = inspect.currentframe().f_code.co_name
+    custom_log(update, function_name)
+    
     await update.message.reply_text('Operation cancelled.')
     return ConversationHandler.END
 
