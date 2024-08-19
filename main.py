@@ -8,7 +8,8 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import subprocess
 
-from create_fake_courses import conversation_handler
+from create_fake_courses import course_conversation_handler
+from create_fake_sms import sms_conversation_handler
 
 load_dotenv()
 client = docker.from_env()
@@ -50,6 +51,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /create_fake_groups - создание фейковых групп.\n'
         '- /create_fake_curators - создание фейковых кураторов;\n'
         '- /create_fake_courses - создание фейковых курсов;\n'
+        '- /create_fake_sms - создание фейковых sm sets;\n'
         '- /create_fake_students - создание фейковых студентов.\n'
         '\n'
         'Команды для управления демоном:\n'
@@ -378,6 +380,7 @@ async def post_init(application: Application) -> None:
             ('create_fake_curators', 'Создание 10 фейковых кураторов'),
             ('create_fake_groups', 'Создание 10 фейковых групп'),
             ('create_fake_courses', 'Создание N фейковых курсов'),
+            ('create_fake_sms', 'Создание N фейковых sm sets'),
             ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
             ('daemonrestart', 'Рестарт работы демона'),
@@ -410,7 +413,8 @@ def main() -> None:
     application.add_handler(CommandHandler('create_fake_students', create_fake_students))
     application.add_handler(CommandHandler('create_fake_curators', create_fake_curators))
     application.add_handler(CommandHandler('create_fake_groups', create_fake_groups))
-    application.add_handler(conversation_handler)
+    application.add_handler(course_conversation_handler)
+    application.add_handler(sms_conversation_handler)
 
     application.add_handler(CommandHandler('daemonpull', daemonpull))
     application.add_handler(CommandHandler('daemonstop', daemonstop))

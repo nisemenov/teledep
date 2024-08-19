@@ -6,25 +6,25 @@ from telegram.ext import CommandHandler, MessageHandler, filters, ConversationHa
 ASKING_FOR_COURSES = 0
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.message.reply_text('How many courses do you need? Default is 100.')
+    await update.message.reply_text('How many sm sets do you need? Default is 100.')
     return ASKING_FOR_COURSES
 
-async def receive_courses_count(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    # Получение количества курсов из сообщения пользователя
-    courses_count = update.message.text
-    if not courses_count.isdigit():
-        courses_count = '100'  # Если пользователь ввел не число, используем значение по умолчанию
+async def receive_sms_count(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # Получение количества sms из сообщения пользователя
+    sms_count = update.message.text
+    if not sms_count.isdigit():
+        sms_count = '100'  # Если пользователь ввел не число, используем значение по умолчанию
 
     # Выполнение скрипта с использованием введенного пользователем значения
-    await update.message.reply_text(f'Starting creating {courses_count} fake courses...')
+    await update.message.reply_text(f'Starting creating {sms_count} fake sm sets...')
     result = subprocess.run(
-        ['./create_fake_courses.sh', courses_count],
+        ['./create_fake_sms.sh', sms_count],
         capture_output=True,
         text=True
     )
     
     if result.returncode == 0:
-        await update.message.reply_text('Successfully created fake courses.')
+        await update.message.reply_text('Successfully created fake sm sets.')
     else:
         await update.message.reply_text(f'Something went wrong: {result.stderr}')
     
@@ -35,10 +35,10 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 # Определение обработчика разговора
-course_conversation_handler = ConversationHandler(
-    entry_points=[CommandHandler('create_fake_courses', start)],
+sms_conversation_handler = ConversationHandler(
+    entry_points=[CommandHandler('create_fake_sms', start)],
     states={
-        ASKING_FOR_COURSES: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_courses_count)],
+        ASKING_FOR_COURSES: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_sms_count)],
     },
     fallbacks=[CommandHandler('cancel', cancel)],
 )
