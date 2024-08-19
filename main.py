@@ -10,6 +10,7 @@ import subprocess
 
 from create_fake_courses import course_conversation_handler
 from create_fake_sms import sms_conversation_handler
+from create_fake_streams import streams_conversation_handler
 
 load_dotenv()
 client = docker.from_env()
@@ -52,6 +53,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '- /create_fake_curators - создание фейковых кураторов;\n'
         '- /create_fake_courses - создание фейковых курсов;\n'
         '- /create_fake_sms - создание фейковых sm sets;\n'
+        '- /create_fake_streams - создание фейковых streams;\n'
         '- /create_fake_students - создание фейковых студентов.\n'
         '\n'
         'Команды для управления демоном:\n'
@@ -380,6 +382,7 @@ async def post_init(application: Application) -> None:
             ('create_fake_curators', 'Создание 10 фейковых кураторов'),
             ('create_fake_groups', 'Создание 10 фейковых групп'),
             ('create_fake_courses', 'Создание N фейковых курсов'),
+            ('create_fake_streams', 'Создание N фейковых streams'),
             ('create_fake_sms', 'Создание N фейковых sm sets'),
             ('pull_dbu_migrate', 'pull + down/build/up + migrate'),
             ('daemonpull', 'Обновление проекта демона'),
@@ -415,6 +418,7 @@ def main() -> None:
     application.add_handler(CommandHandler('create_fake_groups', create_fake_groups))
     application.add_handler(course_conversation_handler)
     application.add_handler(sms_conversation_handler)
+    application.add_handler(streams_conversation_handler)
 
     application.add_handler(CommandHandler('daemonpull', daemonpull))
     application.add_handler(CommandHandler('daemonstop', daemonstop))
